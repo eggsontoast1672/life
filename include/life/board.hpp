@@ -9,6 +9,18 @@
 
 namespace life
 {
+    /**
+     * The state of a cell on the board.
+     *
+     * This is not what is used under the hood to store the state of the board, it just exists to
+     * provide a clearer API for changing the state.
+     */
+    enum class CellState
+    {
+        Live,
+        Dead,
+    };
+
     class Board
     {
     public:
@@ -17,6 +29,7 @@ namespace life
 
         Board(std::size_t width, std::size_t height);
 
+        auto set_cell(std::size_t row, std::size_t column, CellState state) -> void;
         auto step_simulation() -> void;
         auto render(SDL_Renderer *renderer) const -> void;
 
