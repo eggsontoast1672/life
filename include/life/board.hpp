@@ -26,6 +26,7 @@ namespace life
         std::size_t m_width;
         std::size_t m_height;
 
+        auto position_to_index(std::size_t row, std::size_t column) const -> std::size_t;
         auto get_neighbor_indices(std::size_t index) const -> std::array<std::size_t, 8>;
         auto get_live_neighbors(std::size_t index) const -> std::uint8_t;
     };
