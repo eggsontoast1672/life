@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <cstdlib>
 #include <vector>
 
 #include <SDL3/SDL_rect.h>
@@ -72,8 +73,10 @@ namespace life
                 continue;
             }
 
-            const int cell_x = index % m_width;
-            const int cell_y = index / m_width;
+            // This handy function computes the quotient and remainder of this division in one fell
+            // swoop. The quotient is first, and it represents the y coordinate of the cell.
+            // Naturally, the x coordinate of the cell is second.
+            const auto [cell_y, cell_x] = std::lldiv(index, m_width);
             const SDL_FRect rect{
                 cell_x * CELL_WIDTH,
                 cell_y * CELL_HEIGHT,
