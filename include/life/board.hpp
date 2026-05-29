@@ -55,12 +55,11 @@ namespace life
         /**
          * Convert row and column indices into a linear index.
          *
-         * The reason why this method accepts unsigned 32-bit integers for the row and column is
-         * that we want to accept negative inputs. This is so that they wrap around properly to the
-         * other side of the board. They are 32 bits wide so that their product is guaranteed to
-         * fit inside an unsigned 64-bit integer.
+         * The reason why this method accepts signed integers for the row and column is that we
+         * want to accept negative inputs. This is so that they wrap around properly to the other
+         * side of the board.
          */
-        auto position_to_index(std::int32_t row, std::int32_t column) const -> std::size_t;
+        auto position_to_index(std::int64_t row, std::int64_t column) const -> std::size_t;
         auto get_neighbor_indices(std::size_t index) const -> std::array<std::size_t, 8>;
         auto get_live_neighbors(std::size_t index) const -> std::uint8_t;
     };
