@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <limits>
 #include <utility>
 #include <vector>
 
@@ -14,6 +15,20 @@
 
 namespace life
 {
+    namespace
+    {
+        auto wrap_coordinate(std::int64_t coordinate, std::size_t extent) -> std::size_t
+        {
+            assert(extent > 0);
+            assert(extent <= static_cast<std::size_t>(std::numeric_limits<std::int64_t>::max()));
+
+            const std::int64_t signed_extent = static_cast<std::int64_t>(extent);
+            const std::int64_t remainder = coordinate % signed_extent;
+
+            return static_cast<std::size_t>(remainder < 0 ? remainder + signed_extent : remainder);
+        }
+    }
+
     Board::Board(std::size_t width, std::size_t height)
         : m_buffers{std::vector(width * height, false), std::vector(width * height, false)},
           m_width(width),
@@ -102,13 +117,10 @@ namespace life
         m_is_logging = false;
     }
 
-    auto Board::position_to_index(std::int32_t row, std::int32_t column) const -> std::size_t
+    auto Board::position_to_index(std::int64_t row, std::int64_t column) const -> std::size_t
     {
-        // We cannot simply use the modulus operator on its own, since this will not give the
-        // correct result for negative numbers. In particular, we want the true mathematical
-        // modulus here.
-        const std::size_t row_mod = (row % m_height + m_height) % m_height;
-        const std::size_t column_mod = column % m_width;
+        const std::size_t row_mod = wrap_coordinate(row, m_height);
+        const std::size_t column_mod = wrap_coordinate(column, m_width);
 
         return row_mod * m_width + column_mod;
     }
@@ -116,11 +128,9 @@ namespace life
     auto Board::get_neighbor_indices(std::size_t index) const -> std::array<std::size_t, 8>
     {
         std::array<std::size_t, 8> indices;
-        const std::int32_t row = index / m_width;
-        const std::int32_t column = index % m_width;
+        const std::int64_t row = static_cast<std::int64_t>(index / m_width);
+        const std::int64_t column = static_cast<std::int64_t>(index % m_width);
 
-        // FIXME: If the row or column index is zero, subtracting one will cause it to underflow,
-        // which is creating this repeating behavior.
         indices[0] = position_to_index(row - 1, column - 1);
         indices[1] = position_to_index(row - 1, column);
         indices[2] = position_to_index(row - 1, column + 1);
