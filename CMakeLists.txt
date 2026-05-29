@@ -15,7 +15,6 @@ add_executable(
   include/life/board.hpp
   include/life/dashboard.hpp
   src/board.cpp
-  src/context.cpp
   src/dashboard.cpp
   src/main.cpp
 )

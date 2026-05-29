@@ -58,9 +58,14 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event)
     switch (event->type)
     {
     case SDL_EVENT_KEY_DOWN:
-        if (event->key.key == SDLK_SPACE)
+        switch (event->key.key)
         {
+        case SDLK_SPACE:
             state->board.step_simulation();
+            break;
+        case SDLK_L:
+            state->board.log_next_draw();
+            break;
         }
 
         break;
