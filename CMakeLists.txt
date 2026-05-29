@@ -31,7 +31,7 @@ target_link_libraries(gameoflife PRIVATE ${SDL3_LIBRARIES})
 # C Rewrite #
 #############
 
-add_executable(life src-new/main.c)
+add_executable(life src-new/board.c src-new/main.c)
 
 set_property(TARGET life PROPERTY C_EXTENSIONS OFF)
 set_property(TARGET life PROPERTY C_STANDARD 99)
