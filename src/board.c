@@ -13,8 +13,6 @@ typedef unsigned int uint;
 
 const unsigned int SCREEN_WIDTH = 600;
 const unsigned int SCREEN_HEIGHT = 600;
-const unsigned int BOARD_WIDTH = 100;
-const unsigned int BOARD_HEIGHT = 100;
 
 /// Allocate one of the board's underlying buffers.
 ///
@@ -122,10 +120,10 @@ Board board_create(size_t width, size_t height)
 
 void board_set_cell(Board *board, size_t x, size_t y, bool is_live)
 {
-    assert(x < BOARD_WIDTH);
-    assert(y < BOARD_HEIGHT);
+    assert(x < board->width);
+    assert(y < board->height);
 
-    const size_t index = y * BOARD_WIDTH + x;
+    const size_t index = y * board->width + x;
 
     board->back_buffer[index] = is_live;
 }
@@ -161,21 +159,23 @@ void board_swap_buffers(Board *board)
     board->back_buffer = temp;
 }
 
-void board_draw(Board board)
+void board_draw(Board board, Rectangle rect)
 {
-    const float CELL_WIDTH = (float)SCREEN_WIDTH / BOARD_WIDTH;
-    const float CELL_HEIGHT = (float)SCREEN_HEIGHT / BOARD_HEIGHT;
+    const float CELL_WIDTH = (float)rect.width / board.width;
+    const float CELL_HEIGHT = (float)rect.height / board.height;
+
+    DrawRectangleRec(rect, BLACK);
 
     for (size_t y = 0; y < board.height; y++)
     {
         for (size_t x = 0; x < board.width; x++)
         {
-            if (!board.front_buffer[y * BOARD_WIDTH + x])
+            if (!board.front_buffer[y * board.width + x])
             {
                 continue;
             }
 
-            const Vector2 position = {x * CELL_WIDTH, y * CELL_HEIGHT};
+            const Vector2 position = {rect.x + x * CELL_WIDTH, rect.y + y * CELL_HEIGHT};
             const Vector2 size = {CELL_WIDTH, CELL_HEIGHT};
 
             DrawRectangleV(position, size, WHITE);
