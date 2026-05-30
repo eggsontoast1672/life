@@ -3,11 +3,13 @@
 #include <raylib.h>
 
 #include "board.h"
+#include "timer.h"
 
 typedef struct
 {
     Board board;
     Rectangle board_rect;
+    Timer timer;
     bool running;
 } AppState;
 
@@ -23,13 +25,16 @@ static AppState state_init(void)
             SCREEN_WIDTH - PADDING * 2.0f,
             SCREEN_HEIGHT - PADDING * 2.0f,
         },
+        .timer = timer_new(0.1),
         .running = false,
     };
 }
 
 static void update(AppState *state)
 {
-    if (state->running)
+    const bool timer_elapsed = timer_tick(&state->timer);
+
+    if (timer_elapsed && state->running)
     {
         board_step(&state->board);
     }
