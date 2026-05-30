@@ -25,21 +25,19 @@ static AppState state_init(void)
             SCREEN_WIDTH - PADDING * 2.0f,
             SCREEN_HEIGHT - PADDING * 2.0f,
         },
-        .timer = timer_new(20),
+        .timer = timer_new(0.1),
         .running = false,
     };
 }
 
 static void update(AppState *state)
 {
-    timer_start_frame(&state->timer);
+    const bool timer_elapsed = timer_tick(&state->timer);
 
-    if (state->running)
+    if (timer_elapsed && state->running)
     {
         board_step(&state->board);
     }
-
-    timer_end_frame(&state->timer);
 }
 
 static void state_draw(const AppState *state)

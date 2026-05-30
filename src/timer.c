@@ -2,25 +2,25 @@
 
 #include <raylib.h>
 
-Timer timer_new(fps_t target_fps)
+Timer timer_new(seconds_t length)
 {
     return (Timer){
-        .target_frame_time = 1.0 / target_fps,
+        .length = length,
+        .start_time = 0.0,
     };
 }
 
-void timer_start_frame(Timer *timer)
+bool timer_tick(Timer *timer)
 {
-    timer->frame_start_time = GetTime();
-}
+    const seconds_t current_time = GetTime();
 
-void timer_end_frame(Timer *timer)
-{
-    const seconds_t frame_end_time = GetTime();
-    const seconds_t frame_time = frame_end_time - timer->frame_start_time;
-    if (frame_time < timer->target_frame_time)
+    if (current_time - timer->start_time >= timer->length)
     {
-        const seconds_t difference = timer->target_frame_time - frame_time;
-        WaitTime(difference);
+        timer->start_time = current_time;
+        return true;
+    }
+    else
+    {
+        return false;
     }
 }
