@@ -12,7 +12,7 @@
 typedef unsigned int uint;
 
 const unsigned int SCREEN_WIDTH = 600;
-const unsigned int SCREEN_HEIGHT = 700;
+const unsigned int SCREEN_HEIGHT = 600;
 const unsigned int BOARD_WIDTH = 100;
 const unsigned int BOARD_HEIGHT = 100;
 
