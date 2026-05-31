@@ -31,8 +31,8 @@ static void update(AppState *state)
     const bool timer_elapsed = timer_tick(&state->timer);
     const Vector2 mouse_position = GetMousePosition();
 
-    s_cell_width = state->board_rect.width / state->board.width;
-    s_cell_height = state->board_rect.height / state->board.height;
+    s_cell_width = state->board.rect.width / state->board.width;
+    s_cell_height = state->board.rect.height / state->board.height;
 
     if (state->running)
     {
@@ -43,26 +43,24 @@ static void update(AppState *state)
     }
     else
     {
-        if (CheckCollisionPointRec(mouse_position, state->board_rect))
+        if (CheckCollisionPointRec(mouse_position, state->board.rect))
         {
-            const uint x = (mouse_position.x - state->board_rect.x) / s_cell_width;
-            const uint y = (mouse_position.y - state->board_rect.y) / s_cell_height;
+            const uint x = (mouse_position.x - state->board.rect.x) / s_cell_width;
+            const uint y = (mouse_position.y - state->board.rect.y) / s_cell_height;
 
-            state->selected_square.x = x;
-            state->selected_square.y = y;
-            state->is_selected = true;
+            state->board.selected_square.x = x;
+            state->board.selected_square.y = y;
+            state->board.has_selected_square = true;
         }
         else
         {
-            state->is_selected = false;
+            state->board.has_selected_square = false;
         }
 
-        if (state->is_selected && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        if (state->board.has_selected_square && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
         {
-            const bool live =
-                board_get_cell(state->board, state->selected_square.x, state->selected_square.y);
-            board_set_cell(&state->board, state->selected_square.x, state->selected_square.y,
-                           !live);
+            const bool live = board_get_cell(state->board, state->board.selected_square);
+            board_set_cell(&state->board, state->board.selected_square, !live);
         }
     }
 }
@@ -71,18 +69,16 @@ static void draw_grid_lines(const AppState *state)
 {
     const float GRID_LINE_WIDTH = 1.0f;
     const Color GRID_LINE_COLOR = (Color){35, 35, 35, 255};
-    const float CELL_WIDTH = state->board_rect.width / state->board.width;
-    const float CELL_HEIGHT = state->board_rect.height / state->board.height;
 
     // TODO: This could be done in a single loop if the index is used as both a horizontal and
     // vertical position at once.
     for (uint x = 1; x < state->board.width; x++)
     {
         const Rectangle line = {
-            .x = state->board_rect.x + x * CELL_WIDTH,
-            .y = state->board_rect.y,
+            .x = state->board.rect.x + x * s_cell_width,
+            .y = state->board.rect.y,
             .width = GRID_LINE_WIDTH,
-            .height = state->board_rect.height,
+            .height = state->board.rect.height,
         };
 
         DrawRectangleRec(line, GRID_LINE_COLOR);
@@ -91,9 +87,9 @@ static void draw_grid_lines(const AppState *state)
     for (uint y = 1; y < state->board.height; y++)
     {
         const Rectangle line = {
-            .x = state->board_rect.x,
-            .y = state->board_rect.y + y * CELL_HEIGHT,
-            .width = state->board_rect.width,
+            .x = state->board.rect.x,
+            .y = state->board.rect.y + y * s_cell_height,
+            .width = state->board.rect.width,
             .height = GRID_LINE_WIDTH,
         };
 
@@ -103,7 +99,7 @@ static void draw_grid_lines(const AppState *state)
 
 static void draw_highlighted_cell(const AppState *state)
 {
-    if (!state->is_selected)
+    if (!state->board.has_selected_square)
     {
         return;
     }
@@ -112,8 +108,8 @@ static void draw_highlighted_cell(const AppState *state)
     // are assigning the result of the computations to unsigned integer variables, thereby
     // truncating them.
     const Rectangle cell = {
-        .x = state->board_rect.x + state->selected_square.x * s_cell_width,
-        .y = state->board_rect.y + state->selected_square.y * s_cell_height,
+        .x = state->board.rect.x + state->board.selected_square.x * s_cell_width,
+        .y = state->board.rect.y + state->board.selected_square.y * s_cell_height,
         .width = s_cell_width,
         .height = s_cell_height,
     };
@@ -126,7 +122,7 @@ static void state_draw(const AppState *state)
     if (state->running) ClearBackground(GREEN);
     else ClearBackground(RED);
 
-    board_draw(state->board, state->board_rect);
+    board_draw(state->board);
 
     if (!state->running)
     {
@@ -142,11 +138,11 @@ int main(void)
 
     AppState state = state_init();
 
-    board_set_cell(&state.board, 0, 0, true);
-    board_set_cell(&state.board, 1, 1, true);
-    board_set_cell(&state.board, 1, 2, true);
-    board_set_cell(&state.board, 2, 0, true);
-    board_set_cell(&state.board, 2, 1, true);
+    board_set_cell(&state.board, (UVector2){0, 0}, true);
+    board_set_cell(&state.board, (UVector2){1, 1}, true);
+    board_set_cell(&state.board, (UVector2){1, 2}, true);
+    board_set_cell(&state.board, (UVector2){2, 0}, true);
+    board_set_cell(&state.board, (UVector2){2, 1}, true);
 
     while (!WindowShouldClose())
     {
