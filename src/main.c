@@ -7,17 +7,8 @@
 
 typedef struct
 {
-    unsigned int x;
-    unsigned int y;
-} UVector2;
-
-typedef struct
-{
     Board board;
     Timer timer;
-    Rectangle board_rect;
-    UVector2 selected_square;
-    bool is_selected;
     bool running;
 } AppState;
 
