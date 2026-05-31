@@ -19,12 +19,13 @@ static AppState state_init(void)
 
     return (AppState){
         .board = board_create(50, 50),
-        .board_rect = {
-            PADDING,
-            PADDING,
-            SCREEN_WIDTH - PADDING * 2.0f,
-            SCREEN_HEIGHT - PADDING * 2.0f,
-        },
+        .board_rect =
+            {
+                PADDING,
+                PADDING,
+                SCREEN_WIDTH - PADDING * 2.0f,
+                SCREEN_HEIGHT - PADDING * 2.0f,
+            },
         .timer = timer_new(0.1),
         .running = false,
     };
@@ -42,10 +43,8 @@ static void update(AppState *state)
 
 static void state_draw(const AppState *state)
 {
-    if (state->running)
-        ClearBackground(GREEN);
-    else
-        ClearBackground(RED);
+    if (state->running) ClearBackground(GREEN);
+    else ClearBackground(RED);
 
     board_draw(state->board, state->board_rect);
 }
