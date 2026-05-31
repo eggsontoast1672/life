@@ -19,19 +19,9 @@ static float s_cell_height = 0;
 
 static AppState state_init(void)
 {
-    const float PADDING = 5.0f;
-
     return (AppState){
         .board = board_create(10, 10),
-        .board_rect =
-            {
-                PADDING,
-                PADDING,
-                SCREEN_WIDTH - PADDING * 2.0f,
-                SCREEN_HEIGHT - PADDING * 2.0f,
-            },
         .timer = timer_new(0.1),
-        .is_selected = false,
         .running = false,
     };
 }
@@ -55,8 +45,8 @@ static void update(AppState *state)
     {
         if (CheckCollisionPointRec(mouse_position, state->board_rect))
         {
-            const unsigned int x = (mouse_position.x - state->board_rect.x) / s_cell_width;
-            const unsigned int y = (mouse_position.y - state->board_rect.y) / s_cell_height;
+            const uint x = (mouse_position.x - state->board_rect.x) / s_cell_width;
+            const uint y = (mouse_position.y - state->board_rect.y) / s_cell_height;
 
             state->selected_square.x = x;
             state->selected_square.y = y;
@@ -86,7 +76,7 @@ static void draw_grid_lines(const AppState *state)
 
     // TODO: This could be done in a single loop if the index is used as both a horizontal and
     // vertical position at once.
-    for (unsigned int x = 1; x < state->board.width; x++)
+    for (uint x = 1; x < state->board.width; x++)
     {
         const Rectangle line = {
             .x = state->board_rect.x + x * CELL_WIDTH,
@@ -98,7 +88,7 @@ static void draw_grid_lines(const AppState *state)
         DrawRectangleRec(line, GRID_LINE_COLOR);
     }
 
-    for (unsigned int y = 1; y < state->board.height; y++)
+    for (uint y = 1; y < state->board.height; y++)
     {
         const Rectangle line = {
             .x = state->board_rect.x,

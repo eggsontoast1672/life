@@ -8,8 +8,8 @@
 
 #include "types.h"
 
-extern const unsigned int SCREEN_WIDTH;
-extern const unsigned int SCREEN_HEIGHT;
+extern const uint SCREEN_WIDTH;
+extern const uint SCREEN_HEIGHT;
 
 typedef struct
 {

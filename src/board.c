@@ -9,10 +9,8 @@
 
 #include <raylib.h>
 
-typedef unsigned int uint;
-
-const unsigned int SCREEN_WIDTH = 600;
-const unsigned int SCREEN_HEIGHT = 600;
+const uint SCREEN_WIDTH = 600;
+const uint SCREEN_HEIGHT = 600;
 
 /// Allocate one of the board's underlying buffers.
 ///
@@ -40,15 +38,15 @@ static bool *board_allocate_buffer(size_t num_cells)
 /// range for the given board.
 ///
 /// @param board The board in which to compute the index.
-/// @param x The horizontal position of the target cell.
-/// @param y The vertical position of the target cell.
+/// @param position The position of the target cell.
 /// @return The index of the target cell.
-static size_t position_to_index(Board board, uint x, uint y)
+static size_t position_to_index(Board board, UVector2 position)
 {
-    assert(x < board.width);
-    assert(y < board.height);
+    assert(position.x < board.width);
+    assert(position.y < board.height);
 
-    return y * board.width + x;
+    // TODO: Will this ever overflow?
+    return position.y * board.width + position.x;
 }
 
 /// Get the indices of the cells which neighbor the one at `index`.
@@ -72,14 +70,14 @@ static const size_t *get_neighboring_indices(Board board, size_t index)
     const uint upward = (y + board.height - 1) % board.height;
     const uint downward = (y + 1) % board.height;
 
-    indices[0] = position_to_index(board, leftward, upward);
-    indices[1] = position_to_index(board, leftward, y);
-    indices[2] = position_to_index(board, leftward, downward);
-    indices[3] = position_to_index(board, x, upward);
-    indices[4] = position_to_index(board, x, downward);
-    indices[5] = position_to_index(board, rightward, upward);
-    indices[6] = position_to_index(board, rightward, y);
-    indices[7] = position_to_index(board, rightward, downward);
+    indices[0] = position_to_index(board, (UVector2){leftward, upward});
+    indices[1] = position_to_index(board, (UVector2){leftward, y});
+    indices[2] = position_to_index(board, (UVector2){leftward, downward});
+    indices[3] = position_to_index(board, (UVector2){x, upward});
+    indices[4] = position_to_index(board, (UVector2){x, downward});
+    indices[5] = position_to_index(board, (UVector2){rightward, upward});
+    indices[6] = position_to_index(board, (UVector2){rightward, y});
+    indices[7] = position_to_index(board, (UVector2){rightward, downward});
 
     return indices;
 }
@@ -104,37 +102,44 @@ static uint8_t get_num_live_neighbors(Board board, size_t index)
     return num_live_neighbors;
 }
 
-Board board_create(size_t width, size_t height)
+Board board_create(uint width, uint height)
 {
+    const float PADDING = 5.0f;
+
+    // Safety: The below computation can never overflow since the square of `UINT32_MAX` is less
+    // than `UINT64_MAX`.
     const size_t num_cells = width * height;
-    bool *const front_buffer = board_allocate_buffer(num_cells);
-    bool *const back_buffer = board_allocate_buffer(num_cells);
+    const Rectangle rect = {
+        .x = PADDING,
+        .y = PADDING,
+        .width = SCREEN_WIDTH - PADDING * 2.0f,
+        .height = SCREEN_HEIGHT - PADDING * 2.0f,
+    };
 
     return (Board){
-        .front_buffer = front_buffer,
-        .back_buffer = back_buffer,
+        .front_buffer = board_allocate_buffer(num_cells),
+        .back_buffer = board_allocate_buffer(num_cells),
         .width = width,
         .height = height,
+        .rect = rect,
+
+        // This field dictates whether or not the `selected_square` field contains meaningful
+        // information. Since this gets initialized to `false`, we can safely leave
+        // `selected_square` unset for maximum efficiency. I hope I don't regret this decision
+        // later.
+        .has_selected_square = false,
     };
 }
 
-bool board_get_cell(Board board, size_t x, size_t y)
+bool board_get_cell(Board board, UVector2 position)
 {
-    assert(x < board.width);
-    assert(y < board.height);
-
-    const size_t index = y * board.width + x;
-
+    const size_t index = position_to_index(board, position);
     return board.front_buffer[index];
 }
 
-void board_set_cell(Board *board, size_t x, size_t y, bool is_live)
+void board_set_cell(Board *board, UVector2 position, bool is_live)
 {
-    assert(x < board->width);
-    assert(y < board->height);
-
-    const size_t index = y * board->width + x;
-
+    const size_t index = position_to_index(*board, position);
     board->front_buffer[index] = is_live;
 }
 
@@ -169,12 +174,12 @@ void board_swap_buffers(Board *board)
     board->back_buffer = temp;
 }
 
-void board_draw(Board board, Rectangle rect)
+void board_draw(Board board)
 {
-    const float CELL_WIDTH = (float)rect.width / board.width;
-    const float CELL_HEIGHT = (float)rect.height / board.height;
+    const float CELL_WIDTH = (float)board.rect.width / board.width;
+    const float CELL_HEIGHT = (float)board.rect.height / board.height;
 
-    DrawRectangleRec(rect, BLACK);
+    DrawRectangleRec(board.rect, BLACK);
 
     for (size_t y = 0; y < board.height; y++)
     {
@@ -185,7 +190,8 @@ void board_draw(Board board, Rectangle rect)
                 continue;
             }
 
-            const Vector2 position = {rect.x + x * CELL_WIDTH, rect.y + y * CELL_HEIGHT};
+            const Vector2 position = {board.rect.x + x * CELL_WIDTH,
+                                      board.rect.y + y * CELL_HEIGHT};
             const Vector2 size = {CELL_WIDTH, CELL_HEIGHT};
 
             DrawRectangleV(position, size, WHITE);
