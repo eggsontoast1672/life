@@ -47,6 +47,39 @@ static void state_draw(const AppState *state)
     else ClearBackground(RED);
 
     board_draw(state->board, state->board_rect);
+
+    // Draw the placement grid
+    const float GRID_LINE_WIDTH = 1.0f;
+    const Color GRID_LINE_COLOR = (Color){35, 35, 35, 255};
+    const float CELL_WIDTH = state->board_rect.width / state->board.width;
+    const float CELL_HEIGHT = state->board_rect.height / state->board.height;
+
+    if (!state->running)
+    {
+        for (unsigned int x = 1; x < state->board.width; x++)
+        {
+            const Rectangle line = {
+                .x = state->board_rect.x + x * CELL_WIDTH,
+                .y = state->board_rect.y,
+                .width = GRID_LINE_WIDTH,
+                .height = state->board_rect.height,
+            };
+
+            DrawRectangleRec(line, GRID_LINE_COLOR);
+        }
+
+        for (unsigned int y = 1; y < state->board.height; y++)
+        {
+            const Rectangle line = {
+                .x = state->board_rect.x,
+                .y = state->board_rect.y + y * CELL_HEIGHT,
+                .width = state->board_rect.width,
+                .height = GRID_LINE_WIDTH,
+            };
+
+            DrawRectangleRec(line, GRID_LINE_COLOR);
+        }
+    }
 }
 
 int main(void)
