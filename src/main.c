@@ -45,42 +45,44 @@ static AppState state_init(void)
     };
 }
 
-#include <stdio.h> // TODO: Remove me
-
 static void update(AppState *state)
 {
     const bool timer_elapsed = timer_tick(&state->timer);
     const Vector2 mouse_position = GetMousePosition();
 
-    if (CheckCollisionPointRec(mouse_position, state->board_rect))
+    s_cell_width = state->board_rect.width / state->board.width;
+    s_cell_height = state->board_rect.height / state->board.height;
+
+    if (state->running)
     {
-        s_cell_width = state->board_rect.width / state->board.width;
-        s_cell_height = state->board_rect.height / state->board.height;
-
-        const unsigned int x = (mouse_position.x - state->board_rect.x) / s_cell_width;
-        const unsigned int y = (mouse_position.y - state->board_rect.y) / s_cell_height;
-
-        state->selected_square.x = x;
-        state->selected_square.y = y;
-        state->is_selected = true;
+        if (timer_elapsed)
+        {
+            board_step(&state->board);
+        }
     }
     else
     {
-        state->is_selected = false;
-    }
+        if (CheckCollisionPointRec(mouse_position, state->board_rect))
+        {
+            const unsigned int x = (mouse_position.x - state->board_rect.x) / s_cell_width;
+            const unsigned int y = (mouse_position.y - state->board_rect.y) / s_cell_height;
 
-    if (state->is_selected && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-    {
-        const bool live =
-            board_get_cell(state->board, state->selected_square.x, state->selected_square.y);
-        board_set_cell(&state->board, state->selected_square.x, state->selected_square.y, !live);
+            state->selected_square.x = x;
+            state->selected_square.y = y;
+            state->is_selected = true;
+        }
+        else
+        {
+            state->is_selected = false;
+        }
 
-        printf("live: %d\n", live);
-    }
-
-    if (timer_elapsed && state->running)
-    {
-        board_step(&state->board);
+        if (state->is_selected && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+        {
+            const bool live =
+                board_get_cell(state->board, state->selected_square.x, state->selected_square.y);
+            board_set_cell(&state->board, state->selected_square.x, state->selected_square.y,
+                           !live);
+        }
     }
 }
 
