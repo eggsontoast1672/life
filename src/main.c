@@ -18,7 +18,7 @@ static AppState state_init(void)
     const float PADDING = 5.0f;
 
     return (AppState){
-        .board = board_create(50, 50),
+        .board = board_create(10, 10),
         .board_rect =
             {
                 PADDING,
@@ -41,6 +41,68 @@ static void update(AppState *state)
     }
 }
 
+static void draw_grid_lines(const AppState *state)
+{
+    const float GRID_LINE_WIDTH = 1.0f;
+    const Color GRID_LINE_COLOR = (Color){35, 35, 35, 255};
+    const float CELL_WIDTH = state->board_rect.width / state->board.width;
+    const float CELL_HEIGHT = state->board_rect.height / state->board.height;
+
+    // TODO: This could be done in a single loop if the index is used as both a horizontal and
+    // vertical position at once.
+    for (unsigned int x = 1; x < state->board.width; x++)
+    {
+        const Rectangle line = {
+            .x = state->board_rect.x + x * CELL_WIDTH,
+            .y = state->board_rect.y,
+            .width = GRID_LINE_WIDTH,
+            .height = state->board_rect.height,
+        };
+
+        DrawRectangleRec(line, GRID_LINE_COLOR);
+    }
+
+    for (unsigned int y = 1; y < state->board.height; y++)
+    {
+        const Rectangle line = {
+            .x = state->board_rect.x,
+            .y = state->board_rect.y + y * CELL_HEIGHT,
+            .width = state->board_rect.width,
+            .height = GRID_LINE_WIDTH,
+        };
+
+        DrawRectangleRec(line, GRID_LINE_COLOR);
+    }
+}
+
+static void draw_highlighted_cell(const AppState *state)
+{
+    const Vector2 mouse_position = GetMousePosition();
+
+    if (!CheckCollisionPointRec(mouse_position, state->board_rect))
+    {
+        return;
+    }
+
+    const float CELL_WIDTH = state->board_rect.width / state->board.width;
+    const float CELL_HEIGHT = state->board_rect.height / state->board.height;
+    const unsigned int x = (mouse_position.x - state->board_rect.x) / CELL_WIDTH;
+    const unsigned int y = (mouse_position.y - state->board_rect.y) / CELL_HEIGHT;
+    const Color color = {255, 255, 255, 100};
+
+    // It may look like the operations done above are just getting undone here, but notice that we
+    // are assigning the result of the computations to unsigned integer variables, thereby
+    // truncating them.
+    const Rectangle cell = {
+        .x = state->board_rect.x + x * CELL_WIDTH,
+        .y = state->board_rect.y + y * CELL_HEIGHT,
+        .width = CELL_WIDTH,
+        .height = CELL_HEIGHT,
+    };
+
+    DrawRectangleRec(cell, color);
+}
+
 static void state_draw(const AppState *state)
 {
     if (state->running) ClearBackground(GREEN);
@@ -48,37 +110,10 @@ static void state_draw(const AppState *state)
 
     board_draw(state->board, state->board_rect);
 
-    // Draw the placement grid
-    const float GRID_LINE_WIDTH = 1.0f;
-    const Color GRID_LINE_COLOR = (Color){35, 35, 35, 255};
-    const float CELL_WIDTH = state->board_rect.width / state->board.width;
-    const float CELL_HEIGHT = state->board_rect.height / state->board.height;
-
     if (!state->running)
     {
-        for (unsigned int x = 1; x < state->board.width; x++)
-        {
-            const Rectangle line = {
-                .x = state->board_rect.x + x * CELL_WIDTH,
-                .y = state->board_rect.y,
-                .width = GRID_LINE_WIDTH,
-                .height = state->board_rect.height,
-            };
-
-            DrawRectangleRec(line, GRID_LINE_COLOR);
-        }
-
-        for (unsigned int y = 1; y < state->board.height; y++)
-        {
-            const Rectangle line = {
-                .x = state->board_rect.x,
-                .y = state->board_rect.y + y * CELL_HEIGHT,
-                .width = state->board_rect.width,
-                .height = GRID_LINE_WIDTH,
-            };
-
-            DrawRectangleRec(line, GRID_LINE_COLOR);
-        }
+        draw_grid_lines(state);
+        draw_highlighted_cell(state);
     }
 }
 
