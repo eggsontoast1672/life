@@ -118,6 +118,16 @@ Board board_create(size_t width, size_t height)
     };
 }
 
+bool board_get_cell(Board board, size_t x, size_t y)
+{
+    assert(x < board.width);
+    assert(y < board.height);
+
+    const size_t index = y * board.width + x;
+
+    return board.front_buffer[index];
+}
+
 void board_set_cell(Board *board, size_t x, size_t y, bool is_live)
 {
     assert(x < board->width);
@@ -125,7 +135,7 @@ void board_set_cell(Board *board, size_t x, size_t y, bool is_live)
 
     const size_t index = y * board->width + x;
 
-    board->back_buffer[index] = is_live;
+    board->front_buffer[index] = is_live;
 }
 
 void board_step(Board *board)

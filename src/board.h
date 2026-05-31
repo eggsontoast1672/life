@@ -18,6 +18,7 @@ typedef struct
 } Board;
 
 Board board_create(size_t width, size_t height);
+bool board_get_cell(Board board, size_t x, size_t y);
 void board_set_cell(Board *board, size_t x, size_t y, bool is_live);
 void board_step(Board *board);
 void board_swap_buffers(Board *board);
