@@ -65,37 +65,12 @@ static void update(AppState *state)
     }
 }
 
-static void draw_highlighted_cell(const AppState *state)
-{
-    if (!state->board.has_selected_square)
-    {
-        return;
-    }
-
-    // It may look like the operations done above are just getting undone here, but notice that we
-    // are assigning the result of the computations to unsigned integer variables, thereby
-    // truncating them.
-    const Rectangle cell = {
-        .x = state->board.rect.x + state->board.selected_square.x * s_cell_width,
-        .y = state->board.rect.y + state->board.selected_square.y * s_cell_height,
-        .width = s_cell_width,
-        .height = s_cell_height,
-    };
-
-    DrawRectangleRec(cell, (Color){255, 255, 255, 50});
-}
-
 static void state_draw(const AppState *state)
 {
     if (state->running) ClearBackground(GREEN);
     else ClearBackground(RED);
 
     board_draw(state->board, state->running);
-
-    if (!state->running)
-    {
-        draw_highlighted_cell(state);
-    }
 }
 
 int main(void)

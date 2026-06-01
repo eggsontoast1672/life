@@ -207,6 +207,26 @@ static void draw_grid_lines(Board board)
     }
 }
 
+static void draw_highlighted_cell(Board board)
+{
+    if (!board.has_selected_square)
+    {
+        return;
+    }
+
+    // It may look like the operations done above are just getting undone here, but notice that we
+    // are assigning the result of the computations to unsigned integer variables, thereby
+    // truncating them.
+    const Rectangle cell = {
+        .x = board.rect.x + board.selected_square.x * board.cell_size.x,
+        .y = board.rect.y + board.selected_square.y * board.cell_size.y,
+        .width = board.cell_size.x,
+        .height = board.cell_size.y,
+    };
+
+    DrawRectangleRec(cell, (Color){255, 255, 255, 50});
+}
+
 void board_draw(Board board, bool running)
 {
     const float CELL_WIDTH = (float)board.rect.width / board.width;
@@ -234,5 +254,6 @@ void board_draw(Board board, bool running)
     if (!running)
     {
         draw_grid_lines(board);
+        draw_highlighted_cell(board);
     }
 }
