@@ -1,9 +1,30 @@
-#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
 #include <raylib.h>
 
 #include "board.h"
+#include "str_utils.h"
 #include "timer.h"
+
+typedef struct
+{
+    UVector2 board_size;
+} Config;
+
+static Config parse_config(int argc, char **argv)
+{
+    for (size_t i = 1; i < argc; i++)
+    {
+        if (str_strip_prefix((const char **)&argv[i], "--size="))
+        {
+            printf("size = %s\n", argv[i]);
+        }
+    }
+
+    // TODO: Actually parse the size
+    return (Config){.board_size = (UVector2){50, 50}};
+}
 
 typedef struct
 {
@@ -43,18 +64,14 @@ static void state_draw(const AppState *state)
     board_draw(state->board, state->running);
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
+    const Config config = parse_config(argc, argv);
+
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Game of Life");
     SetTargetFPS(60);
 
     AppState state = state_init();
-
-    board_set_cell(&state.board, (UVector2){0, 0}, true);
-    board_set_cell(&state.board, (UVector2){1, 1}, true);
-    board_set_cell(&state.board, (UVector2){1, 2}, true);
-    board_set_cell(&state.board, (UVector2){2, 0}, true);
-    board_set_cell(&state.board, (UVector2){2, 1}, true);
 
     while (!WindowShouldClose())
     {
