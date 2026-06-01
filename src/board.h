@@ -60,6 +60,9 @@ bool board_get_cell(Board board, UVector2 position);
 /// @param is_live The new state that the cell should have.
 void board_set_cell(Board *board, UVector2 position, bool is_live);
 
+/// TODO: Add comment
+void board_update(Board *board, bool running);
+
 /// Step the simulation once.
 ///
 /// The core functionality of the program comes from here.

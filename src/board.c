@@ -132,6 +132,12 @@ Board board_create(uint width, uint height)
     };
 }
 
+void board_destroy(Board board)
+{
+    free(board.front_buffer);
+    free(board.back_buffer);
+}
+
 bool board_get_cell(Board board, UVector2 position)
 {
     const size_t index = position_to_index(board, position);
@@ -142,6 +148,31 @@ void board_set_cell(Board *board, UVector2 position, bool is_live)
 {
     const size_t index = position_to_index(*board, position);
     board->front_buffer[index] = is_live;
+}
+
+void board_update(Board *board, bool running)
+{
+    const Vector2 mouse_position = GetMousePosition();
+
+    if (CheckCollisionPointRec(mouse_position, board->rect))
+    {
+        const uint x = (mouse_position.x - board->rect.x) / board->cell_size.x;
+        const uint y = (mouse_position.y - board->rect.y) / board->cell_size.y;
+
+        board->selected_square.x = x;
+        board->selected_square.y = y;
+        board->has_selected_square = true;
+    }
+    else
+    {
+        board->has_selected_square = false;
+    }
+
+    if (board->has_selected_square && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    {
+        const bool live = board_get_cell(*board, board->selected_square);
+        board_set_cell(board, board->selected_square, !live);
+    }
 }
 
 void board_step(Board *board)
