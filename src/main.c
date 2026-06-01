@@ -8,23 +8,14 @@
 typedef struct
 {
     Board board;
-    Rectangle board_rect;
     Timer timer;
     bool running;
 } AppState;
 
 static AppState state_init(void)
 {
-    const float PADDING = 5.0f;
-
     return (AppState){
-        .board = board_create(50, 50),
-        .board_rect = {
-            PADDING,
-            PADDING,
-            SCREEN_WIDTH - PADDING * 2.0f,
-            SCREEN_HEIGHT - PADDING * 2.0f,
-        },
+        .board = board_create(10, 10),
         .timer = timer_new(0.1),
         .running = false,
     };
@@ -33,21 +24,23 @@ static AppState state_init(void)
 static void update(AppState *state)
 {
     const bool timer_elapsed = timer_tick(&state->timer);
+    const Vector2 mouse_position = GetMousePosition();
 
-    if (timer_elapsed && state->running)
+    if (state->running)
     {
-        board_step(&state->board);
+        if (timer_elapsed) board_step(&state->board);
+        return;
     }
+
+    board_update(&state->board, state->running);
 }
 
 static void state_draw(const AppState *state)
 {
-    if (state->running)
-        ClearBackground(GREEN);
-    else
-        ClearBackground(RED);
+    if (state->running) ClearBackground(GREEN);
+    else ClearBackground(RED);
 
-    board_draw(state->board, state->board_rect);
+    board_draw(state->board, state->running);
 }
 
 int main(void)
@@ -57,13 +50,11 @@ int main(void)
 
     AppState state = state_init();
 
-    board_set_cell(&state.board, 0, 0, true);
-    board_set_cell(&state.board, 1, 1, true);
-    board_set_cell(&state.board, 1, 2, true);
-    board_set_cell(&state.board, 2, 0, true);
-    board_set_cell(&state.board, 2, 1, true);
-
-    board_swap_buffers(&state.board);
+    board_set_cell(&state.board, (UVector2){0, 0}, true);
+    board_set_cell(&state.board, (UVector2){1, 1}, true);
+    board_set_cell(&state.board, (UVector2){1, 2}, true);
+    board_set_cell(&state.board, (UVector2){2, 0}, true);
+    board_set_cell(&state.board, (UVector2){2, 1}, true);
 
     while (!WindowShouldClose())
     {
@@ -79,6 +70,5 @@ int main(void)
         EndDrawing();
     }
 
-    free(state.board.front_buffer);
-    free(state.board.back_buffer);
+    board_destroy(state.board);
 }
