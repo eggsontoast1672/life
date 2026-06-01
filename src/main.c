@@ -65,38 +65,6 @@ static void update(AppState *state)
     }
 }
 
-static void draw_grid_lines(const AppState *state)
-{
-    const float GRID_LINE_WIDTH = 1.0f;
-    const Color GRID_LINE_COLOR = (Color){35, 35, 35, 255};
-
-    // TODO: This could be done in a single loop if the index is used as both a horizontal and
-    // vertical position at once.
-    for (uint x = 1; x < state->board.width; x++)
-    {
-        const Rectangle line = {
-            .x = state->board.rect.x + x * s_cell_width,
-            .y = state->board.rect.y,
-            .width = GRID_LINE_WIDTH,
-            .height = state->board.rect.height,
-        };
-
-        DrawRectangleRec(line, GRID_LINE_COLOR);
-    }
-
-    for (uint y = 1; y < state->board.height; y++)
-    {
-        const Rectangle line = {
-            .x = state->board.rect.x,
-            .y = state->board.rect.y + y * s_cell_height,
-            .width = state->board.rect.width,
-            .height = GRID_LINE_WIDTH,
-        };
-
-        DrawRectangleRec(line, GRID_LINE_COLOR);
-    }
-}
-
 static void draw_highlighted_cell(const AppState *state)
 {
     if (!state->board.has_selected_square)
@@ -122,11 +90,10 @@ static void state_draw(const AppState *state)
     if (state->running) ClearBackground(GREEN);
     else ClearBackground(RED);
 
-    board_draw(state->board);
+    board_draw(state->board, state->running);
 
     if (!state->running)
     {
-        draw_grid_lines(state);
         draw_highlighted_cell(state);
     }
 }

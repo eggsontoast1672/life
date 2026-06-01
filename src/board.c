@@ -121,6 +121,7 @@ Board board_create(uint width, uint height)
         .back_buffer = board_allocate_buffer(num_cells),
         .width = width,
         .height = height,
+        .cell_size = (Vector2){rect.width / width, rect.height / height},
         .rect = rect,
 
         // This field dictates whether or not the `selected_square` field contains meaningful
@@ -174,7 +175,39 @@ void board_swap_buffers(Board *board)
     board->back_buffer = temp;
 }
 
-void board_draw(Board board)
+static void draw_grid_lines(Board board)
+{
+    const float GRID_LINE_WIDTH = 1.0f;
+    const Color GRID_LINE_COLOR = (Color){35, 35, 35, 255};
+
+    // TODO: This could be done in a single loop if the index is used as both a horizontal and
+    // vertical position at once.
+    for (uint x = 1; x < board.width; x++)
+    {
+        const Rectangle line = {
+            .x = board.rect.x + x * board.cell_size.x,
+            .y = board.rect.y,
+            .width = GRID_LINE_WIDTH,
+            .height = board.rect.height,
+        };
+
+        DrawRectangleRec(line, GRID_LINE_COLOR);
+    }
+
+    for (uint y = 1; y < board.height; y++)
+    {
+        const Rectangle line = {
+            .x = board.rect.x,
+            .y = board.rect.y + y * board.cell_size.y,
+            .width = board.rect.width,
+            .height = GRID_LINE_WIDTH,
+        };
+
+        DrawRectangleRec(line, GRID_LINE_COLOR);
+    }
+}
+
+void board_draw(Board board, bool running)
 {
     const float CELL_WIDTH = (float)board.rect.width / board.width;
     const float CELL_HEIGHT = (float)board.rect.height / board.height;
@@ -196,5 +229,10 @@ void board_draw(Board board)
 
             DrawRectangleV(position, size, WHITE);
         }
+    }
+
+    if (!running)
+    {
+        draw_grid_lines(board);
     }
 }

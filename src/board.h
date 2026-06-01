@@ -15,6 +15,7 @@ typedef struct
 {
     bool *front_buffer, *back_buffer;
     uint width, height;
+    Vector2 cell_size;
     Rectangle rect;
     UVector2 selected_square;
     bool has_selected_square;
@@ -80,6 +81,7 @@ void board_swap_buffers(Board *board);
 /// Draw the board to the screen.
 ///
 /// @param board The board to be drawn.
-void board_draw(Board board);
+/// @param running Whether or not the simulation is running.
+void board_draw(Board board, bool running);
 
 #endif
