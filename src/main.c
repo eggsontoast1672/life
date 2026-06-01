@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include <raylib.h>
 
 #include "board.h"
@@ -15,7 +13,7 @@ typedef struct
 static AppState state_init(void)
 {
     return (AppState){
-        .board = board_create(10, 10),
+        .board = board_create(50, 50),
         .timer = timer_new(0.1),
         .running = false,
     };
@@ -49,12 +47,6 @@ int main(void)
     SetTargetFPS(60);
 
     AppState state = state_init();
-
-    board_set_cell(&state.board, (UVector2){0, 0}, true);
-    board_set_cell(&state.board, (UVector2){1, 1}, true);
-    board_set_cell(&state.board, (UVector2){1, 2}, true);
-    board_set_cell(&state.board, (UVector2){2, 0}, true);
-    board_set_cell(&state.board, (UVector2){2, 1}, true);
 
     while (!WindowShouldClose())
     {
